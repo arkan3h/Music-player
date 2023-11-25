@@ -16,11 +16,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MusicPlayer',
+      debugShowCheckedModeBanner: false,
+      title: 'eLagu',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade800),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'MusicPlayer'),
+      home: const MyHomePage(title: 'eLagu'),
     );
   }
 }
@@ -33,10 +35,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // bg color
-  //Color bgColor = const Color(0XFF2A2A2A); //Colors.black;
-  Color bgColor = Colors.indigo;
-
   //define on audio plugin
   final OnAudioQuery _audioQuery = OnAudioQuery();
 
@@ -90,12 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if(isPlayerViewVisible){
       return Scaffold(
-        backgroundColor: bgColor,
         body: SingleChildScrollView(
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.only(top: 56.0, right: 20.0, left: 20.0),
-            decoration: BoxDecoration(color: bgColor),
             child: Column(
               children: <Widget>[
                 //exit button and the song title
@@ -108,8 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           onTap: _changePlayerViewVisibility, //hides the player view
                           child:  Container(
                             padding: const EdgeInsets.all(10.0),
-                            decoration:  getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
-                            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white70,),
+                            child: const Icon(Icons.arrow_back_ios_new,),
                           ),
                         ),
                     ),
@@ -117,7 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Text(
                         currentSongTitle,
                         style: const TextStyle(
-                          color: Colors.white70,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
@@ -148,7 +142,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     Container(
                       padding: EdgeInsets.zero,
                       margin: const EdgeInsets.only(bottom: 4.0),
-                      decoration: getRectDecoration(BorderRadius.circular(20.0), const Offset(2, 2), 2.0, 0.0),
 
                       //slider bar duration state stream
                       child: StreamBuilder<DurationState>(
@@ -162,9 +155,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             progress: progress,
                             total: total,
                             barHeight: 20.0,
-                            baseBarColor: bgColor,
-                            progressBarColor:  Color.fromARGB(232, 158, 158, 158),
-                            thumbColor:  Colors.white60.withBlue(99),
                             timeLabelTextStyle: const TextStyle(
                               fontSize: 0,
                             ),
@@ -192,7 +182,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Text(
                                 progress.toString().split(".")[0],
                                 style: const TextStyle(
-                                  color: Colors.white70,
                                   fontSize: 15,
                                 ),
                               ),
@@ -201,7 +190,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Text(
                                 total.toString().split(".")[0],
                                 style: const TextStyle(
-                                  color: Colors.white70,
                                   fontSize: 15,
                                 ),
                               ),
@@ -231,8 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10.0),
-                            decoration: getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
-                            child: const Icon(Icons.skip_previous, color: Colors.white70,),
+                            child: const Icon(Icons.skip_previous,),
                           ),
                         ),
                       ),
@@ -252,15 +239,14 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Container(
                             padding: const EdgeInsets.all(20.0),
                             margin: const EdgeInsets.only(right: 20.0, left: 20.0),
-                            decoration: getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
                             child: StreamBuilder<bool>(
                               stream: _player.playingStream,
                               builder: (context, snapshot){
                                 bool? playingState = snapshot.data;
                                 if(playingState != null && playingState){
-                                  return const Icon(Icons.pause, size: 30, color: Colors.white70,);
+                                  return const Icon(Icons.pause, size: 30,);
                                 }
-                                return const Icon(Icons.play_arrow, size: 30, color: Colors.white70,);
+                                return const Icon(Icons.play_arrow, size: 30,);
                               },
                             ),
                           ),
@@ -277,8 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10.0),
-                            decoration: getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
-                            child: const Icon(Icons.skip_next, color: Colors.white70,),
+                            child: const Icon(Icons.skip_next,),
                           ),
                         ),
                       ),
@@ -300,8 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           onTap: (){_changePlayerViewVisibility();},
                           child: Container(
                             padding: const EdgeInsets.all(10.0),
-                            decoration:  getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
-                            child: const Icon(Icons.list_alt, color: Colors.white70,),
+                            child: const Icon(Icons.list_alt,),
                           ),
                         ),
                       ),
@@ -316,8 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Container(
                             padding: const EdgeInsets.all(10.0),
                             margin:  const EdgeInsets.only(right: 30.0, left: 30.0),
-                            decoration:  getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
-                            child: const Icon(Icons.shuffle, color: Colors.white70,),
+                            child: const Icon(Icons.shuffle,),
                           ),
                         ),
                       ),
@@ -330,15 +313,14 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10.0),
-                            decoration:  getDecoration(BoxShape.circle, const Offset(2, 2), 2.0, 0.0),
                             child: StreamBuilder<LoopMode>(
                               stream: _player.loopModeStream,
                               builder: (context, snapshot){
                                 final loopMode = snapshot.data;
                                 if(LoopMode.one == loopMode){
-                                  return const Icon(Icons.repeat_one, color: Colors.white70,);
+                                  return const Icon(Icons.repeat_one,);
                                 }
-                                return const Icon(Icons.repeat, color: Colors.white70,);
+                                return const Icon(Icons.repeat,);
                               },
                             ),
                           ),
@@ -361,9 +343,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         //backgroundColor: bgColor,
         elevation: 20,
-        backgroundColor: bgColor,
       ),
-      backgroundColor: bgColor,
       body: FutureBuilder<List<SongModel>>(
         //default values
         future: _audioQuery.querySongs(
@@ -391,44 +371,24 @@ class _MyHomePageState extends State<MyHomePage> {
           return ListView.builder(
               itemCount: item.data!.length,
               itemBuilder: (context, index){
-
                 return Container(
                   margin: const EdgeInsets.only(top: 15.0, left: 12.0, right: 16.0),
                   padding: const EdgeInsets.only(top: 30.0, bottom: 30),
                   decoration: BoxDecoration(
-                    color: bgColor,
                     borderRadius: BorderRadius.circular(20.0),
-                    boxShadow: const[
-                      BoxShadow(
-                        blurRadius: 4.0,
-                        offset: Offset(-4, -4),
-                        color: Colors.white24,
-                      ),
-                      BoxShadow(
-                        blurRadius: 4.0,
-                        offset: Offset(4, 4),
-                        color: Colors.black,
-                      ),
-                    ],
                   ),
                   child:ListTile(
-                    textColor: Colors.white,
                     title: Text(item.data![index].title),
                     subtitle: Text(item.data![index].displayName,
-                      style: const TextStyle(
-                        color: Colors.white60,
-                      ),
                     ),
                     trailing: const Icon(Icons.more_vert),
                     leading: QueryArtworkWidget(
                       id: item.data![index].id,
                       type: ArtworkType.AUDIO,
-
                     ),
                     onTap: () async {
                       //show the player view
                       _changePlayerViewVisibility();
-
                       toast(context, "Playing:  " + item.data![index].title);
                       // Try to load audio from a source and catch any errors.
                     //  String? uri = item.data![index].uri;
@@ -470,7 +430,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //create playlist
-    ConcatenatingAudioSource createPlaylist(List<SongModel> songs) {
+  ConcatenatingAudioSource createPlaylist(List<SongModel> songs) {
     List<AudioSource> sources = [];
     for (var song in songs){
       sources.add(AudioSource.uri(Uri.parse(song.uri!)));
@@ -490,18 +450,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
  BoxDecoration getDecoration(BoxShape shape, Offset offset, double blurRadius, double spreadRadius) {
     return BoxDecoration(
-      color: bgColor,
       shape: shape,
       boxShadow: [
         BoxShadow(
           offset: -offset,
-          color: Colors.white24,
           blurRadius: blurRadius,
           spreadRadius: spreadRadius,
         ),
         BoxShadow(
           offset: offset,
-          color: Colors.black,
           blurRadius: blurRadius,
           spreadRadius: spreadRadius,
         )
@@ -512,17 +469,14 @@ class _MyHomePageState extends State<MyHomePage> {
  BoxDecoration getRectDecoration(BorderRadius borderRadius, Offset offset, double blurRadius, double spreadRadius) {
     return BoxDecoration(
       borderRadius: borderRadius,
-      color: bgColor,
       boxShadow: [
         BoxShadow(
           offset: -offset,
-          color: Colors.white24,
           blurRadius: blurRadius,
           spreadRadius: spreadRadius,
         ),
         BoxShadow(
           offset: offset,
-          color: Colors.black,
           blurRadius: blurRadius,
           spreadRadius: spreadRadius,
         )
