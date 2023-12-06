@@ -1,10 +1,43 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:music_player_app1/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'pages/home.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  for (final box in hiveBoxes) {
+    await openHiveBox(
+      box['name'].toString(),
+      limit: box['limit'] as bool? ?? false,
+    );
+  }
+
   runApp(const MyApp());
+}
+
+Future<void> openHiveBox(String boxName, {bool limit = false}) async {
+  final box = await Hive.openBox(boxName).onError((error, stackTrace) async {
+    final Directory dir = await getApplicationDocumentsDirectory();
+    final String dirPath = dir.path;
+    File dbFile = File('$dirPath/$boxName.hive');
+    File lockFile = File('$dirPath/$boxName.lock');
+    
+    await dbFile.delete();
+    await lockFile.delete();
+    await Hive.openBox(boxName);
+    throw 'Failed to open $boxName Box\nError: $error';
+  });
+  // clear box if it grows large
+  if (limit && box.length > 500) {
+    box.clear();
+  }
 }
 
 class MyApp extends StatelessWidget {
