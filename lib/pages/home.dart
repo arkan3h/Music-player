@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../helper/audio_query.dart';
 import '../services/player_service.dart';
 import '../widgets/empty_screen.dart';
+import '../widgets/mini_player.dart';
 import '../widgets/playlist_head.dart';
 import '../widgets/snackbar.dart';
 
@@ -37,6 +38,7 @@ class MyHomePageState extends State<MyHomePage>
   final Map<String, List<SongModel>> _artists = {};
   final Map<String, List<SongModel>> _genres = {};
   final Map<String, List<SongModel>> _folders = {};
+  final miniplayer = MiniPlayer();
 
   final List<String> _sortedAlbumKeysList = [];
   final List<String> _sortedArtistKeysList = [];
@@ -260,7 +262,9 @@ class MyHomePageState extends State<MyHomePage>
             settings(context);
           },
         ),
-        title: const Text('eLagu'),
+        title: Text(
+          widget.title ?? 'eLagu',
+        ),
         bottom: TabBar(
           isScrollable: widget.showPlaylists,
           controller: _tcontroller,
@@ -406,6 +410,7 @@ class MyHomePageState extends State<MyHomePage>
                   // videosTab(),
                 ],
               ),
+      bottomNavigationBar: miniplayer,
     );
   }
 }
@@ -591,17 +596,17 @@ class _AlbumsTabState extends State<AlbumsTab>
                   subtitle: Text(
                     '${widget.albums[widget.albumsList[index]]!.length} Lagu',
                   ),
-                  // onTap: () {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //       builder: (context) => DownloadedSongs(
-                  //         title: widget.albumsList[index],
-                  //         cachedSongs: widget.albums[widget.albumsList[index]],
-                  //       ),
-                  //     ),
-                  //   );
-                  // },
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyHomePage(
+                          title: widget.albumsList[index],
+                          cachedSongs: widget.albums[widget.albumsList[index]],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
