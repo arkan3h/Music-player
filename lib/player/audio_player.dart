@@ -35,11 +35,11 @@ class _PlayScreenState extends State<PlayScreen> {
         stream: audioHandler.mediaItem,
         builder: (context, snapshot) {
           final MediaItem? mediaItem = snapshot.data;
-          final offline = !mediaItem!.extras!['url'].toString().startsWith('http');
+          if (mediaItem == null) return const SizedBox();
+          final offline = !mediaItem.extras!['url'].toString().startsWith('http');
           return SafeArea(
             child: Scaffold(
               resizeToAvoidBottomInset: false,
-              backgroundColor: Colors.transparent,
               appBar: AppBar(
                 elevation: 0,
                 backgroundColor: Colors.transparent,
@@ -585,6 +585,16 @@ class NowPlayingStream extends StatelessWidget {
                                 dimension: 50,
                                 child: Image(
                                         fit: BoxFit.cover,
+                                        errorBuilder: (
+                                          BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace,
+                                        ) {
+                                          return const Image(
+                                            fit: BoxFit.cover,
+                                            image: AssetImage('assets/cover.jpg'),
+                                          );
+                                        },
                                         image: FileImage(
                                           File(
                                             queue[queueStateIndex + index]
@@ -684,9 +694,10 @@ class _ArtWorkWidgetState extends State<ArtWorkWidget> {
                           Object exception,
                           StackTrace? stackTrace,
                         ) {
-                          return const Image(
+                          return Image(
                             fit: BoxFit.cover,
-                            image: AssetImage('assets/cover.jpg'),
+                            width: widget.width * 0.85,
+                            image: const AssetImage('assets/cover.jpg'),
                           );
                         },
                         image: FileImage(
@@ -734,7 +745,7 @@ class _ArtWorkWidgetState extends State<ArtWorkWidget> {
                                         );
                                       },
                                       icon: const Icon(Icons.info_rounded),
-                                      color: Theme.of(context).iconTheme.color,
+                                      color: Colors.white, 
                                     ),
                                   ),
                                 ),
@@ -800,7 +811,7 @@ class NameNControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double titleBoxHeight = height * 0.25;
-    final double seekBoxHeight = height > 500 ? height * 0.15 : height * 0.2;
+    final double seekBoxHeight = height > 500 ? height * 0.15 : height * 0.21;
     final double controlBoxHeight = offline
         ? height > 500
             ? height * 0.2
@@ -810,12 +821,9 @@ class NameNControls extends StatelessWidget {
             : height > 500
                 ? height * 0.2
                 : height * 0.3);
-    final double nowplayingBoxHeight = min(70, height * 0.15);
+    final double nowplayingBoxHeight = min(70, height * 0.2);
     // height > 500 ? height * 0.4 : height * 0.15;
     // final double minNowplayingBoxHeight = height * 0.15;
-    final String gradientType = Hive.box('settings')
-        .get('gradientType', defaultValue: 'halfDark')
-        .toString();
     return SizedBox(
       width: width,
       height: height,
@@ -836,7 +844,6 @@ class NameNControls extends StatelessWidget {
                         SizedBox(
                           height: titleBoxHeight / 10,
                         ),
-                
                         /// Title container
                         AnimatedText(
                           text: mediaItem.title
@@ -1032,7 +1039,7 @@ class NameNControls extends StatelessWidget {
           // Up Next with blur background
           SlidingUpPanel(
             minHeight: nowplayingBoxHeight,
-            maxHeight: 500,
+            maxHeight: 350,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(15.0),
               topRight: Radius.circular(15.0),
@@ -1040,13 +1047,13 @@ class NameNControls extends StatelessWidget {
             margin: EdgeInsets.zero,
             padding: EdgeInsets.zero,
             boxShadow: const [],
-            color: ['fullLight', 'fullMix'].contains(gradientType)
-                ? Theme.of(context).brightness == Brightness.dark
-                    ? const Color.fromRGBO(0, 0, 0, 0.05)
-                    : const Color.fromRGBO(255, 255, 255, 0.05)
-                : Theme.of(context).brightness == Brightness.dark
-                    ? const Color.fromRGBO(0, 0, 0, 0.5)
-                    : const Color.fromRGBO(255, 255, 255, 0.5),
+            // color: ['fullLight', 'fullMix'].contains(gradientType)
+            //     ? Theme.of(context).brightness == Brightness.dark
+            //         ? const Color.fromRGBO(0, 0, 0, 0.05)
+            //         : const Color.fromRGBO(255, 255, 255, 0.05)
+            //     : Theme.of(context).brightness == Brightness.dark
+            //         ? const Color.fromRGBO(0, 0, 0, 0.5)
+            //         : const Color.fromRGBO(255, 255, 255, 0.5),
             // gradientColor![1]!.withOpacity(0.5),
             // useBlurForNowPlaying
             // ? Theme.of(context).brightness == Brightness.dark
@@ -1057,46 +1064,14 @@ class NameNControls extends StatelessWidget {
             // : Colors.white,
             controller: panelController,
             panelBuilder: (ScrollController scrollController) {
-              return ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(15.0),
-                  topRight: Radius.circular(15.0),
-                ),
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(
-                    sigmaX: 8.0,
-                    sigmaY: 8.0,
-                  ),
-                  child: ShaderMask(
-                    shaderCallback: (rect) {
-                      return const LinearGradient(
-                        end: Alignment.topCenter,
-                        begin: Alignment.center,
-                        colors: [
-                          Colors.black,
-                          Colors.black,
-                          Colors.black,
-                          Colors.transparent,
-                          Colors.transparent,
-                        ],
-                      ).createShader(
-                        Rect.fromLTRB(
-                          0,
-                          0,
-                          rect.width,
-                          rect.height,
-                        ),
-                      );
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: NowPlayingStream(
-                      head: true,
-                      headHeight: nowplayingBoxHeight,
-                      audioHandler: audioHandler,
-                      scrollController: scrollController,
-                      panelController: panelController,
-                    ),
-                  ),
+              return Container(
+                color: Theme.of(context).colorScheme.background,
+                child: NowPlayingStream(
+                  head: true,
+                  headHeight: nowplayingBoxHeight,
+                  audioHandler: audioHandler,
+                  scrollController: scrollController,
+                  panelController: panelController,
                 ),
               );
             },
@@ -1120,7 +1095,7 @@ class NameNControls extends StatelessWidget {
               child: Container(
                 height: nowplayingBoxHeight,
                 width: width,
-                color: Colors.transparent,
+                color: Theme.of(context).colorScheme.background,
                 child: Column(
                   children: [
                     const SizedBox(

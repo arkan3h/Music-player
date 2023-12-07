@@ -7,7 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:music_player_app1/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'helper/route.dart';
-import 'pages/home.dart';
+import 'helper/route_handler.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'player/audio_player.dart';
@@ -51,10 +51,26 @@ Future<void> openHiveBox(String boxName, {bool limit = false}) async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;
 
   const MyApp({super.key, this.savedThemeMode});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late StreamSubscription _intentTextStreamSubscription;
+  late StreamSubscription _intentDataStreamSubscription;
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void dispose() {
+    _intentTextStreamSubscription.cancel();
+    _intentDataStreamSubscription.cancel();
+    super.dispose();
+  }
 
   // This widget is the root of your application.
   @override
@@ -70,13 +86,15 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         colorSchemeSeed: Colors.blue,
       ),
-      initial: savedThemeMode ?? AdaptiveThemeMode.light,
+      initial: widget.savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'eLagu',
         theme: theme,
         darkTheme: darkTheme,
-        home: const MyHomePage(),
+        // home: const MyHomePage(),
+        routes: namedRoutes,
+        navigatorKey: navigatorKey,
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/player') {
             return PageRouteBuilder(
