@@ -33,12 +33,16 @@ dependencies:
   adaptive_theme: ^3.4.1
   on_audio_query: ^2.9.0
   just_audio: ^0.9.36
-  audio_video_progress_bar: ^2.0.1
   rxdart: ^0.27.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.1
   permission_handler: ^11.0.1
+  get_it: ^7.6.4
+  audio_service: ^0.18.12
+  sliding_up_panel: ^2.0.0+1
+  marquee: ^2.2.3
+  audio_session: ^0.1.18
 
 
   # The following adds the Cupertino Icons font to your application.

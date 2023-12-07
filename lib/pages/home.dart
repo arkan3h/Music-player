@@ -7,6 +7,7 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../helper/audio_query.dart';
+import '../services/player_service.dart';
 import '../widgets/empty_screen.dart';
 import '../widgets/playlist_head.dart';
 import '../widgets/snackbar.dart';
@@ -494,14 +495,14 @@ class _SongsTabState extends State<SongsTab>
                           '${widget.songs[index].artist?.replaceAll('<unknown>', 'Unknown') ?? 'Tidak dikenal'} - ${widget.songs[index].album?.replaceAll('<unknown>', 'Unknown') ?? 'Tidak dikenal'}',
                           overflow: TextOverflow.ellipsis,
                         ),
-                        // onTap: () {
-                        //   PlayerInvoke.init(
-                        //     songsList: widget.songs,
-                        //     index: index,
-                        //     isOffline: true,
-                        //     recommend: false,
-                        //   );
-                        // },
+                        onTap: () {
+                          PlayerInvoke.init(
+                            songsList: widget.songs,
+                            index: index,
+                            isOffline: true,
+                            recommend: false,
+                          );
+                        },
                       );
                     },
                   ),

@@ -3,10 +3,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:get_it/get_it.dart';
 import 'package:music_player_app1/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'helper/route.dart';
 import 'pages/home.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import 'player/audio_player.dart';
+import 'provider/audio_service_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +23,14 @@ void main() async {
       limit: box['limit'] as bool? ?? false,
     );
   }
-
+  await startService();
   runApp(const MyApp());
+}
+
+Future<void> startService() async {
+  final audioHandlerHelper = AudioHandlerHelper();
+  final AudioPlayerHandler audioHandler = await audioHandlerHelper.getAudioHandler();
+  GetIt.I.registerSingleton<AudioPlayerHandler>(audioHandler);
 }
 
 Future<void> openHiveBox(String boxName, {bool limit = false}) async {
@@ -66,6 +77,15 @@ class MyApp extends StatelessWidget {
         theme: theme,
         darkTheme: darkTheme,
         home: const MyHomePage(),
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/player') {
+            return PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (_, __, ___) => const PlayScreen(),
+            );
+          }
+          return HandleRoute.handleRoute(settings.name);
+        },
       ),
     );
   }
