@@ -92,7 +92,6 @@ class _MyAppState extends State<MyApp> {
         title: 'eLagu',
         theme: theme,
         darkTheme: darkTheme,
-        // home: const MyHomePage(),
         routes: namedRoutes,
         navigatorKey: navigatorKey,
         onGenerateRoute: (RouteSettings settings) {

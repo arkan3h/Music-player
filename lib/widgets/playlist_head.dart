@@ -1,5 +1,6 @@
-// import 'package:e_music/Services/player_service.dart';
 import 'package:flutter/material.dart';
+
+import '../services/player_service.dart';
 
 class PlaylistHead extends StatelessWidget {
   final List songsList;
@@ -30,14 +31,14 @@ class PlaylistHead extends StatelessWidget {
           const Spacer(),
           TextButton.icon(
             onPressed: () {
-              // PlayerInvoke.init(
-              //   songsList: songsList,
-              //   index: 0,
-              //   isOffline: offline,
-              //   fromDownloads: fromDownloads,
-              //   recommend: false,
-              //   shuffle: true,
-              // );
+              PlayerInvoke.init(
+                songsList: songsList,
+                index: 0,
+                isOffline: offline,
+                fromDownloads: fromDownloads,
+                recommend: false,
+                shuffle: true,
+              );
             },
             icon: const Icon(Icons.shuffle_rounded),
             label: const Text(
@@ -47,13 +48,13 @@ class PlaylistHead extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              // PlayerInvoke.init(
-              //   songsList: songsList,
-              //   index: 0,
-              //   isOffline: offline,
-              //   fromDownloads: fromDownloads,
-              //   recommend: false,
-              // );
+              PlayerInvoke.init(
+                songsList: songsList,
+                index: 0,
+                isOffline: offline,
+                fromDownloads: fromDownloads,
+                recommend: false,
+              );
             },
             tooltip: 'Acak',
             icon: const Icon(Icons.play_arrow_rounded),
