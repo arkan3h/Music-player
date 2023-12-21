@@ -45,7 +45,7 @@ class _PlayScreenState extends State<PlayScreen> {
                 resizeToAvoidBottomInset: false,
                 appBar: AppBar(
                   elevation: 0,
-                  backgroundColor: const Color.fromARGB(255, 239, 247, 251),
+                  backgroundColor: Theme.of(context).colorScheme.onSecondary,
                   centerTitle: true,
                   leading: IconButton(
                     icon: const Icon(Icons.expand_more_rounded),
@@ -115,7 +115,7 @@ class _PlayScreenState extends State<PlayScreen> {
                   ) {
                     if (constraints.maxWidth > constraints.maxHeight) {
                       return Container(
-                        color: const Color.fromARGB(255, 239, 247, 251),
+                        color: Theme.of(context).colorScheme.onSecondary,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -152,7 +152,7 @@ class _PlayScreenState extends State<PlayScreen> {
                       );
                     }
                     return Container(
-                      color: const Color.fromARGB(255, 239, 247, 251),
+                      color: Theme.of(context).colorScheme.onSecondary,
                       child: Stack(
                         children: [
                           Column(

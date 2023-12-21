@@ -30,7 +30,14 @@ class _MiniPlayerState extends State<MiniPlayer> {
     return SafeArea(
       top: false,
       child: Container(
-        color: const Color.fromARGB(255, 239, 247, 251),
+        decoration: const BoxDecoration(
+          boxShadow: [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, .25), 
+                blurRadius: 2.0
+              )
+            ],
+        ),
         child: StreamBuilder<MediaItem?>(
           stream: audioHandler.mediaItem,
           builder: (context, snapshot) {
@@ -80,7 +87,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
                   return Future.value(false);
                 },
                 child: Card(
-                  color: const Color.fromARGB(255, 239, 247, 251),
+                  color: Theme.of(context).colorScheme.onSecondary,
                   margin: const EdgeInsets.symmetric(
                     horizontal: 2.0,
                     vertical: 1.0,
