@@ -1,5 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 
+import 'url_image_getter.dart';
+
 class MediaItemConverter {
   static Map mediaItemToMap(MediaItem mediaItem) {
     return {
@@ -23,6 +25,50 @@ class MediaItemConverter {
       'perma_url': mediaItem.extras?['perma_url'],
       'expire_at': mediaItem.extras?['expire_at'],
     };
+  }
+
+  static MediaItem mapToMediaItem(
+    Map song, {
+    bool addedByAutoplay = false,
+    bool autoplay = true,
+    String? playlistBox,
+  }) {
+    return MediaItem(
+      id: song['id'].toString(),
+      album: song['album'].toString(),
+      artist: song['artist'].toString(),
+      duration: Duration(
+        seconds: int.parse(
+          (song['duration'] == null ||
+                  song['duration'] == 'null' ||
+                  song['duration'] == '')
+              ? '180'
+              : song['duration'].toString(),
+        ),
+      ),
+      title: song['title'].toString(),
+      artUri: Uri.parse(
+        UrlImageGetter([song['image'].toString()]).highQuality,
+      ),
+      genre: song['language'].toString(),
+      extras: {
+        'url': song['url'],
+        'allUrls': song['allUrls'],
+        'year': song['year'],
+        'language': song['language'],
+        '320kbps': song['320kbps'],
+        'quality': song['quality'],
+        'has_lyrics': song['has_lyrics'],
+        'release_date': song['release_date'],
+        'album_id': song['album_id'],
+        'subtitle': song['subtitle'],
+        'perma_url': song['perma_url'],
+        'expire_at': song['expire_at'],
+        'addedByAutoplay': addedByAutoplay,
+        'autoplay': autoplay,
+        'playlistBox': playlistBox,
+      },
+    );
   }
 
   static MediaItem downMapToMediaItem(Map song) {

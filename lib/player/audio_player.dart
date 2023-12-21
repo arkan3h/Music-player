@@ -7,7 +7,7 @@ import 'dart:math';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -45,7 +45,7 @@ class _PlayScreenState extends State<PlayScreen> {
                 resizeToAvoidBottomInset: false,
                 appBar: AppBar(
                   elevation: 0,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: const Color.fromARGB(255, 239, 247, 251),
                   centerTitle: true,
                   leading: IconButton(
                     icon: const Icon(Icons.expand_more_rounded),
@@ -114,28 +114,67 @@ class _PlayScreenState extends State<PlayScreen> {
                     BoxConstraints constraints,
                   ) {
                     if (constraints.maxWidth > constraints.maxHeight) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          // Artwork
-                          ArtWorkWidget(
-                            mediaItem: mediaItem,
-                            width: min(
-                              constraints.maxHeight / 0.9,
-                              constraints.maxWidth / 1.8,
+                      return Container(
+                        color: const Color.fromARGB(255, 239, 247, 251),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Artwork
+                            ArtWorkWidget(
+                              mediaItem: mediaItem,
+                              width: min(
+                                constraints.maxHeight / 0.9,
+                                constraints.maxWidth / 1.8,
+                              ),
+                              audioHandler: audioHandler,
+                              offline: offline,
                             ),
-                            audioHandler: audioHandler,
-                            offline: offline,
-                          ),
-
-                          // title and controls
-                          NameNControls(
-                            mediaItem: mediaItem,
-                            offline: offline,
-                            width: constraints.maxWidth / 2,
-                            height: constraints.maxHeight,
-                            panelController: _panelController,
-                            audioHandler: audioHandler,
+                        
+                            // title and controls
+                            NameNControls(
+                              mediaItem: mediaItem,
+                              offline: offline,
+                              width: constraints.maxWidth / 2,
+                              height: constraints.maxHeight,
+                              panelController: _panelController,
+                              audioHandler: audioHandler,
+                            ),
+                            NextSong(
+                              mediaItem: mediaItem,
+                              offline: offline,
+                              width: constraints.maxWidth,
+                              height: constraints.maxHeight,
+                              panelController: _panelController,
+                              audioHandler: audioHandler,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return Container(
+                      color: const Color.fromARGB(255, 239, 247, 251),
+                      child: Stack(
+                        children: [
+                          Column(
+                            children: [
+                              // Artwork
+                              ArtWorkWidget(
+                                mediaItem: mediaItem,
+                                width: constraints.maxWidth,
+                                audioHandler: audioHandler,
+                                offline: offline,
+                              ),
+                              // title and controls
+                              NameNControls(
+                                mediaItem: mediaItem,
+                                offline: offline,
+                                width: constraints.maxWidth,
+                                height: constraints.maxHeight -
+                                    (constraints.maxWidth * 0.85),
+                                panelController: _panelController,
+                                audioHandler: audioHandler,
+                              ),
+                            ],
                           ),
                           NextSong(
                             mediaItem: mediaItem,
@@ -146,40 +185,7 @@ class _PlayScreenState extends State<PlayScreen> {
                             audioHandler: audioHandler,
                           ),
                         ],
-                      );
-                    }
-                    return Stack(
-                      children: [
-                        Column(
-                          children: [
-                            // Artwork
-                            ArtWorkWidget(
-                              mediaItem: mediaItem,
-                              width: constraints.maxWidth,
-                              audioHandler: audioHandler,
-                              offline: offline,
-                            ),
-                            // title and controls
-                            NameNControls(
-                              mediaItem: mediaItem,
-                              offline: offline,
-                              width: constraints.maxWidth,
-                              height: constraints.maxHeight -
-                                  (constraints.maxWidth * 0.85),
-                              panelController: _panelController,
-                              audioHandler: audioHandler,
-                            ),
-                          ],
-                        ),
-                        NextSong(
-                          mediaItem: mediaItem,
-                          offline: offline,
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight,
-                          panelController: _panelController,
-                          audioHandler: audioHandler,
-                        ),
-                      ],
+                      ),
                     );
                   },
                 ),

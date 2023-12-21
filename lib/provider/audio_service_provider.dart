@@ -19,8 +19,8 @@ class AudioHandlerHelper {
     audioHandler = await AudioService.init(
       builder: () => AudioPlayerHandlerImpl(),
       config: AudioServiceConfig(
-        androidNotificationChannelId: 'com.shadow.blackhole.channel.audio',
-        androidNotificationChannelName: 'BlackHole',
+        androidNotificationChannelId: 'com.example.music_player_app1.channel.audio',
+        androidNotificationChannelName: 'eLagu',
         androidNotificationIcon: 'drawable/ic_stat_music_note',
         androidShowNotificationBadge: true,
         androidStopForegroundOnPause: false,

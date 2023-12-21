@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:audio_session/audio_session.dart';
 
+import '../helper/media_item.dart';
 import '../player/audio_player.dart';
 import 'isolate_service.dart';
 
@@ -136,6 +139,16 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
           : null;
     }).whereType<MediaItem>().distinct().listen(mediaItem.add);
 
+    // Propagate all events from the audio player to AudioService clients.
+    _player!.playbackEventStream
+        .listen(_broadcastState, onError: _playbackError);
+
+    _player!.shuffleModeEnabledStream
+        .listen((enabled) => _broadcastState(_player!.playbackEvent));
+
+    _player!.loopModeStream
+        .listen((event) => _broadcastState(_player!.playbackEvent));
+
     _player!.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
         stop();
@@ -152,12 +165,59 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
 
     try {
       if (loadStart) {
-        await _player!
+        final List lastQueueList = await Hive.box('cache')
+            .get('lastQueue', defaultValue: [])?.toList() as List;
+
+        final int lastIndex =
+            await Hive.box('cache').get('lastIndex', defaultValue: 0) as int;
+
+        final int lastPos =
+            await Hive.box('cache').get('lastPos', defaultValue: 0) as int;
+
+        if (lastQueueList.isNotEmpty &&
+            lastQueueList.first['genre'] != 'YouTube') {
+          final List<MediaItem> lastQueue = lastQueueList
+              .map((e) => MediaItemConverter.mapToMediaItem(e as Map))
+              .toList();
+          if (lastQueue.isEmpty) {
+            await _player!
+                .setAudioSource(_playlist, preload: false)
+                .onError((error, stackTrace) {
+              _onError(error, stackTrace, stopService: true);
+              return null;
+            });
+          } else {
+            await _playlist.addAll(_itemsToSources(lastQueue));
+            try {
+              await _player!
+                  .setAudioSource(
+                _playlist,
+              )
+                  .onError((error, stackTrace) {
+                _onError(error, stackTrace, stopService: true);
+                return null;
+              });
+              if (lastIndex != 0 || lastPos > 0) {
+                await _player!
+                    .seek(Duration(seconds: lastPos), index: lastIndex);
+              }
+            } catch (e) {
+              await _player!
+                  .setAudioSource(_playlist, preload: false)
+                  .onError((error, stackTrace) {
+                _onError(error, stackTrace, stopService: true);
+                return null;
+              });
+            }
+          }
+        } else {
+          await _player!
               .setAudioSource(_playlist, preload: false)
               .onError((error, stackTrace) {
             _onError(error, stackTrace, stopService: true);
             return null;
           });
+        }
       } else {
         await _player!
             .setAudioSource(_playlist, preload: false)
@@ -238,6 +298,14 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
     _player = AudioPlayer();
   }
 
+  Future<void> addLastQueue(List<MediaItem> queue) async {
+    if (queue.isNotEmpty && queue.first.genre != 'YouTube') {
+      final lastQueue =
+          queue.map((item) => MediaItemConverter.mediaItemToMap(item)).toList();
+      Hive.box('cache').put('lastQueue', lastQueue);
+    }
+  }
+
   Future<void> skipToMediaItem(String? id, int? idx) async {
     if (idx == null && id == null) return;
     final index = idx ?? queue.value.indexWhere((item) => item.id == id);
@@ -257,6 +325,11 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
     if (res != null) {
       await _playlist.add(res);
     }
+  }
+
+  @override
+  Future<void> addQueueItems(List<MediaItem> mediaItems) async {
+    await _playlist.addAll(_itemsToSources(mediaItems));
   }
 
   @override
@@ -297,6 +370,20 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
 
   @override
   Future<void> skipToNext() => _player!.seekToNext();
+  
+  @override
+  Future<void> fastForward() async {
+    if (mediaItem.value?.id != null) {
+      _broadcastState(_player!.playbackEvent);
+    }
+  }
+
+  @override
+  Future<void> rewind() async {
+    if (mediaItem.value?.id != null) {
+      _broadcastState(_player!.playbackEvent);
+    }
+  }
 
   @override
   Future<void> skipToPrevious() async {
@@ -330,6 +417,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
   @override
   Future<void> pause() async {
     _player!.pause();
+    await Hive.box('cache').put('lastIndex', _player!.currentIndex);
+    await Hive.box('cache').put('lastPos', _player!.position.inSeconds);
+    await addLastQueue(queue.value);
   }
 
   @override
@@ -341,6 +431,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
     await playbackState.firstWhere(
       (state) => state.processingState == AudioProcessingState.idle,
     );
+    await Hive.box('cache').put('lastIndex', _player!.currentIndex);
+    await Hive.box('cache').put('lastPos', _player!.position.inSeconds);
+    await addLastQueue(queue.value);
   }
 
   @override
@@ -424,5 +517,44 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
 
   void _onError(err, stacktrace, {bool stopService = false}) {
     if (stopService) stop();
+  }
+
+  void _broadcastState(PlaybackEvent event) {
+    final playing = _player!.playing;
+    final queueIndex = getQueueIndex(
+      event.currentIndex,
+      _player!.shuffleIndices,
+      shuffleModeEnabled: _player!.shuffleModeEnabled,
+    );
+    playbackState.add(
+      playbackState.value.copyWith(
+        controls: [
+          // workaround to add like button
+          if (!Platform.isIOS)
+          MediaControl.skipToPrevious,
+          if (playing) MediaControl.pause else MediaControl.play,
+          MediaControl.skipToNext,
+          if (!Platform.isIOS) MediaControl.stop,
+        ],
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.seekForward,
+          MediaAction.seekBackward,
+        },
+        androidCompactActionIndices: preferredCompactNotificationButtons,
+        processingState: const {
+          ProcessingState.idle: AudioProcessingState.idle,
+          ProcessingState.loading: AudioProcessingState.loading,
+          ProcessingState.buffering: AudioProcessingState.buffering,
+          ProcessingState.ready: AudioProcessingState.ready,
+          ProcessingState.completed: AudioProcessingState.completed,
+        }[_player!.processingState]!,
+        playing: playing,
+        updatePosition: _player!.position,
+        bufferedPosition: _player!.bufferedPosition,
+        speed: _player!.speed,
+        queueIndex: queueIndex,
+      ),
+    );
   }
 }
