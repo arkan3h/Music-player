@@ -437,6 +437,44 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler with QueueHandler, SeekHan
   }
 
   @override
+  Future customAction(String name, [Map<String, dynamic>? extras]) {
+    if (name == 'sleepCounter') {
+      if (extras?['count'] != null &&
+          extras!['count'].runtimeType == int &&
+          extras['count'] > 0 as bool) {
+        count = extras['count'] as int;
+      }
+    }
+
+    if (name == 'fastForward') {
+      try {
+        const stepInterval = Duration(seconds: 10);
+        Duration newPosition = _player!.position + stepInterval;
+        if (newPosition < Duration.zero) newPosition = Duration.zero;
+        if (newPosition > _player!.duration!) newPosition = _player!.duration!;
+        _player!.seek(newPosition);
+      } catch (e) {
+      }
+    }
+
+    if (name == 'rewind') {
+      try {
+        const stepInterval = Duration(seconds: 10);
+        Duration newPosition = _player!.position - stepInterval;
+        if (newPosition < Duration.zero) newPosition = Duration.zero;
+        if (newPosition > _player!.duration!) newPosition = _player!.duration!;
+        _player!.seek(newPosition);
+      } catch (e) {
+      }
+    }
+
+    if (name == 'skipToMediaItem') {
+      skipToMediaItem(extras!['id'] as String?, extras['index'] as int?);
+    }
+    return super.customAction(name, extras);
+  }
+
+  @override
   Future<void> setShuffleMode(AudioServiceShuffleMode mode) async {
     final enabled = mode == AudioServiceShuffleMode.all;
     if (enabled) {

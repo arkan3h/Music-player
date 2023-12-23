@@ -1,11 +1,9 @@
 import 'dart:io';
 
-// import 'package:e_music/Services/youtube_services.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-// import 'package:logging/logging.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -41,7 +39,6 @@ class PlayerInvoke {
 
     if (!fromMiniplayer) {
       if (Platform.isIOS) {
-        // Don't know why but it fixes the playback issue with iOS Side
         audioHandler.stop();
       }
       if (offline) {
@@ -50,7 +47,13 @@ class PlayerInvoke {
             : (Platform.isWindows || Platform.isLinux)
                 ? setOffDesktopValues(finalList, globalIndex)
                 : setOffValues(finalList, globalIndex);
-      } 
+      } else {
+        setValues(
+          finalList,
+          globalIndex,
+          recommend: recommend,
+        );
+      }
     }
   }
 
@@ -157,6 +160,26 @@ class PlayerInvoke {
       ),
     );
     updateNplay(queue, index);
+  }
+
+  static Future<void> setValues(
+    List response,
+    int index, {
+    bool recommend = true,
+    // String? playlistBox,
+  }) async {
+    final List<MediaItem> queue = [];
+
+    queue.addAll(
+      response.map(
+        (song) => MediaItemConverter.mapToMediaItem(
+          song as Map,
+          autoplay: recommend,
+          // playlistBox: playlistBox,
+        ),
+      ),
+    );
+    await updateNplay(queue, index);
   }
 
   static Future<void> updateNplay(List<MediaItem> queue, int index) async {
